@@ -2,6 +2,7 @@ package com.abenzaggagh.jettip
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +30,7 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             JetTipApp {
                 Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                    Spacer(Modifier.height(14.dp))
                     TotalPerPerson()
                     Spacer(Modifier.height(8.dp))
                     MainContent()
@@ -87,6 +90,7 @@ fun TotalPerPerson(totalPerPerson: Double = 134.0) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(12.dp)
             .height(150.dp),
         color = MaterialTheme.colorScheme.primary,
         shape = RoundedCornerShape(corner = CornerSize(12.dp))
@@ -133,6 +137,18 @@ fun BillForm(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    var person = remember {
+        mutableIntStateOf(0)
+    }
+
+    var sliderPositionState = remember {
+        mutableStateOf(0f)
+    }
+
+    val sliderState = remember(sliderPositionState.value) {
+        "%.2f".format(sliderPositionState.value * 100)
+    }
+
     Surface(
         modifier = Modifier
             .padding(2.dp)
@@ -163,7 +179,7 @@ fun BillForm(
 
             if (validState) {
                 Row(
-                    modifier = Modifier.padding(3.dp),
+                    modifier = Modifier.padding(6.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text("Split",
@@ -172,19 +188,63 @@ fun BillForm(
                     Spacer(modifier = Modifier.width(120.dp))
                     Row(
                         modifier = modifier.padding(horizontal = 3.dp),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = Arrangement.End,
+                        // verticalAlignment = Alignment.CenterVertically
                     ) {
                         RoundIconButton(
                             imageVector = Icons.Default.Remove,
-                            onClick = { },
+                            onClick = {
+                                if (person.intValue > 0) {
+                                    person.intValue = person.intValue - 1
+                                }
+                            },
+                        )
+                        Text(text = "${person.intValue}",
+                            modifier = Modifier
+                                .align(alignment = Alignment.CenterVertically)
+                                .padding(start = 9.dp, end = 9.dp)
+
                         )
                         RoundIconButton(
                             imageVector = Icons.Default.Add,
-                            onClick = { },
+                            onClick = {
+                                person.intValue += 1
+                            },
                         )
                     }
                 }
-            } else {
+
+                Row(
+                    modifier = Modifier
+                        .padding(6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text("Tip",
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                    Spacer(modifier = modifier.width(140.dp))
+                    Text("$33.00",
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+                Spacer(modifier = modifier.height(14.dp))
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("${sliderState}%")
+                    Spacer(modifier = modifier.height(14.dp))
+                    Slider(
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp),
+                        value = sliderPositionState.value,
+                        valueRange = 0f..1f,
+                        steps = 5,
+                        onValueChange = { newValue ->
+                            sliderPositionState.value = newValue
+                    })
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+             } else {
                 Box() {}
             }
 
